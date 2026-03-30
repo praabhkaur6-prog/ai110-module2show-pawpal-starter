@@ -12,6 +12,7 @@ class Task:
     due_date: date = field(default_factory=date.today)
 
     def mark_complete(self):
+        """Mark task done. Returns next Task if recurring, else None."""
         self.is_complete = True
         if self.frequency == "daily":
             return Task(self.description, self.time, self.frequency,
@@ -29,9 +30,11 @@ class Pet:
     tasks: List[Task] = field(default_factory=list)
 
     def add_task(self, task: Task):
+        """Add a task to this pet's list."""
         self.tasks.append(task)
 
     def get_tasks(self):
+        """Return all tasks for this pet."""
         return self.tasks
 
 
@@ -41,9 +44,11 @@ class Owner:
     pets: List[Pet] = field(default_factory=list)
 
     def add_pet(self, pet: Pet):
+        """Add a pet to this owner's family."""
         self.pets.append(pet)
 
     def get_all_tasks(self):
+        """Return all tasks across all pets as (pet_name, task) pairs."""
         result = []
         for pet in self.pets:
             for task in pet.get_tasks():
@@ -54,12 +59,15 @@ class Owner:
 class Scheduler:
 
     def __init__(self, owner: Owner):
+        """Needs an Owner to access all pets and tasks."""
         self.owner = owner
 
     def sort_by_time(self):
+        """Return all tasks sorted earliest to latest."""
         return sorted(self.owner.get_all_tasks(), key=lambda pair: pair[1].time)
 
     def filter_tasks(self, pet_name=None, status=None):
+        """Filter tasks by pet name and/or completion status."""
         tasks = self.owner.get_all_tasks()
         if pet_name:
             tasks = [(p, t) for p, t in tasks if p == pet_name]
@@ -70,6 +78,7 @@ class Scheduler:
         return tasks
 
     def detect_conflicts(self):
+        """Return warnings when two tasks are scheduled at the exact same time."""
         seen = {}
         warnings = []
         for pet_name, task in self.owner.get_all_tasks():
